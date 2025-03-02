@@ -98,5 +98,11 @@ def article(index):
         app.logger.error(f"访问文章详情页出错: {str(e)}")
         return '服务器内部错误', 500
 
+@app.route('/refresh')
+def refresh():
+    """手动刷新数据缓存"""
+    cache.delete('articles')
+    return redirect('/')
+
 if __name__ == '__main__':
     app.run(debug=True)
