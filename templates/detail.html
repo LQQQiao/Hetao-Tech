@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .article-container {
+        background: white;
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .article-title {
+        font-size: 32px;
+        font-weight: 700;
+        margin: 0 0 24px;
+        color: var(--text-color);
+    }
+    .article-content {
+        font-size: 16px;
+        line-height: 1.8;
+        color: var(--text-color);
+    }
+    .article-link {
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="article-container">
+    <h1 class="article-title">{{ article.title }}</h1>
+    <div class="article-content">
+        {{ article.content|safe }}
+    </div>
+    {% if article.link %}
+    <div class="article-link">
+        <a href="{{ article.link }}" class="button" target="_blank">查看原文</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

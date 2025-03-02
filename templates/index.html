@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .article-list {
+        display: grid;
+        gap: 20px;
+    }
+    .article-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    .article-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0, 163, 255, 0.15);
+        border-color: rgba(0, 163, 255, 0.3);
+    }
+    .article-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 0 16px;
+        color: var(--text-color);
+        background: var(--gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 2px 10px rgba(0, 163, 255, 0.1);
+    }
+    .article-summary {
+        color: var(--secondary-text);
+        margin-bottom: 20px;
+        line-height: 1.6;
+        font-size: 16px;
+    }
+    .article-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+    }
+    .article-date {
+        color: var(--secondary-text);
+        font-size: 14px;
+    }
+    .read-more {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    .read-more:hover {
+        opacity: 0.8;
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="article-list">
+    {% for article in articles %}
+    <div class="article-card">
+        <h2 class="article-title">{{ article.title }}</h2>
+        <p class="article-summary">{{ article.summary }}</p>
+        <div class="article-footer">
+            <span class="article-date">{{ article.date[:10] }}</span>
+            <a href="{{ article.link }}" target="_blank" class="read-more">阅读全文</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
