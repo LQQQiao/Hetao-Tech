@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app.py"
+    }
+  ],
+  "env": {
+    "FEISHU_APP_ID": "cli_a737802ccfde501c",
+    "FEISHU_APP_SECRET": "nUXVjy3tQG1yntwC2m6NLgdjWHvBItT8",
+    "BASE_ID": "BgJAbUiInakleysUv9IcbCn2n0f",
+    "TABLE_ID": "tbl0T6bzLy1H3cuH"
+  }
+}
