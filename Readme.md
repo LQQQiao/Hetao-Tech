@@ -62,12 +62,12 @@ pip install -r requirements.txt
 ```python
 class Config:
     # 飞书应用配置
-    FEISHU_APP_ID="cli_a737802ccfde501c"
-    FEISHU_APP_SECRET="nUXVjy3tQG1yntwC2m6NLgdjWHvBItT8"
+    FEISHU_APP_ID="@"
+    FEISHU_APP_SECRET="@"
     
     # 多维表格配置
-    BASE_ID="BgJAbUiInakleysUv9IcbCn2n0f"
-    TABLE_ID="tbl0T6bzLy1H3cuH
+    BASE_ID="@"
+    TABLE_ID="@
 ```
 
 4. 运行应用：
