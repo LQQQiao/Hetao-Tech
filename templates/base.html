@@ -56,6 +56,25 @@
             padding: 15px 20px;
             text-align: center;
         }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            color: #FFFFFF;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            margin: 0 auto;
+        }
+        .download-btn {
+            position: absolute;
+            right: 20px;
+        }
         .date-info {
             color: rgba(255, 255, 255, 0.8);
             font-size: 14px;
@@ -71,7 +90,7 @@
         }
         main {
             min-height: calc(100vh - 200px);
-            padding: 40px 0;
+            padding: 12px 0;
         }
         .button {
             display: inline-block;
@@ -88,13 +107,49 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 15px rgba(0, 163, 255, 0.3);
         }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .download-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .download-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .download-btn svg {
+            width: 20px;
+            height: 20px;
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <header>
         <div class="container">
-            <a href="/" class="logo">河套应用创新技术资讯</a>
+            <div class="header-content">
+                <a href="/" class="logo">河套应用创新技术资讯</a>
+                <button id="downloadBtn" class="download-btn" title="下载最近7天的新闻">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </button>
+            </div>
             <div class="date-info" id="dateInfo"></div>
             <script>
                 function updateDate() {
@@ -115,5 +170,6 @@
     </main>
 
     {% block extra_js %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/download.js') }}"></script>
 </body>
 </html>

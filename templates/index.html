@@ -1,19 +1,8 @@
 {% extends "base.html" %}
 
 {% block extra_js %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var socket = io();
-        var currentArticles = [];
-
-        function compareArticles(a1, a2) {
-            return a1.title === a2.title && 
-                   a1.summary === a2.summary && 
-                   a1.date === a2.date && 
-                   a1.link === a2.link;
-        }
-
         function createArticleElement(article) {
             var articleCard = document.createElement('div');
             articleCard.className = 'article-card';
@@ -40,21 +29,9 @@
             }, delay);
         }
 
-        socket.on('articles_update', function(data) {
-            if (JSON.stringify(currentArticles) === JSON.stringify(data.articles)) {
-                return; // 如果数据没有变化，不进行更新
-            }
-
-            var articleList = document.querySelector('.article-list');
-            articleList.innerHTML = '';
-            
-            data.articles.forEach(function(article, index) {
-                var articleCard = createArticleElement(article);
-                articleList.appendChild(articleCard);
-                animateArticle(articleCard, index * 100); // 错开动画时间
-            });
-
-            currentArticles = [...data.articles];
+        // 初始化文章列表动画
+        document.querySelectorAll('.article-card').forEach((card, index) => {
+            animateArticle(card, index * 100);
         });
     });
 </script>
@@ -65,13 +42,15 @@
     .article-list {
         display: grid;
         gap: 20px;
+        padding-top: 15px;
+        margin-top: 0;
     }
     .article-card {
         display: block;
         text-decoration: none;
         background: var(--card-bg);
         border-radius: 16px;
-        padding: 24px;
+        padding: 20px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         cursor: pointer;

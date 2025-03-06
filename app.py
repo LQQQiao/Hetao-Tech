@@ -4,12 +4,10 @@ import requests
 import jwt
 import time
 from datetime import datetime
-from flask_socketio import SocketIO
 import pytz
 
 app = Flask(__name__)
 app.config.from_object(Config)
-socketio = SocketIO(app)
 
 def get_tenant_access_token():
     """获取飞书tenant_access_token"""
@@ -60,23 +58,11 @@ def get_articles():
     app.logger.error(f"获取文章数据失败: {response.status_code} - {response.text}")
     return []
 
-def check_updates():
-    """检查飞书多维表格更新并通知客户端"""
-    while True:
-        articles = get_articles()
-        socketio.emit('articles_update', {'articles': articles})
-        socketio.sleep(10)  # 每10秒检查一次更新
-
 @app.route('/')
 def index():
     """首页路由"""
     articles = get_articles()
     return render_template('index.html', articles=articles)
-
-@socketio.on('connect')
-def handle_connect():
-    """客户端连接事件处理"""
-    socketio.start_background_task(check_updates)
 
 @app.route('/article/<int:index>')
 def article(index):
@@ -119,4 +105,4 @@ def refresh():
     return redirect('/')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='127.0.0.1', port=5000)
