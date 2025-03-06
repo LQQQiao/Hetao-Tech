@@ -4,11 +4,12 @@ import requests
 import jwt
 import time
 from datetime import datetime
-from flask_caching import Cache
+from flask_socketio import SocketIO
+import pytz
 
 app = Flask(__name__)
 app.config.from_object(Config)
-cache = Cache(app)
+socketio = SocketIO(app)
 
 def get_tenant_access_token():
     """获取飞书tenant_access_token"""
@@ -21,7 +22,6 @@ def get_tenant_access_token():
     response = requests.post(url, json=payload, headers=headers)
     return response.json().get("tenant_access_token")
 
-@cache.cached(timeout=3600, key_prefix='articles')
 def get_articles():
     """从飞书多维表格获取文章数据"""
     token = get_tenant_access_token()
@@ -43,8 +43,10 @@ def get_articles():
             # 处理时间字段
             date = fields.get('时间', '')
             if isinstance(date, int):
-                # 如果是时间戳，转换为字符串格式
-                date = datetime.fromtimestamp(date/1000).strftime('%Y-%m-%d %H:%M:%S')
+                # 使用pytz处理时区转换
+                tz = pytz.timezone('Asia/Shanghai')
+                date = datetime.fromtimestamp(date/1000).replace(tzinfo=pytz.UTC)
+                date = date.astimezone(tz).strftime('%Y-%m-%d')
             articles.append({
                 'title': fields.get('标题', ''),
                 'summary': fields.get('总结摘要', ''),
@@ -58,11 +60,23 @@ def get_articles():
     app.logger.error(f"获取文章数据失败: {response.status_code} - {response.text}")
     return []
 
+def check_updates():
+    """检查飞书多维表格更新并通知客户端"""
+    while True:
+        articles = get_articles()
+        socketio.emit('articles_update', {'articles': articles})
+        socketio.sleep(10)  # 每10秒检查一次更新
+
 @app.route('/')
 def index():
     """首页路由"""
     articles = get_articles()
     return render_template('index.html', articles=articles)
+
+@socketio.on('connect')
+def handle_connect():
+    """客户端连接事件处理"""
+    socketio.start_background_task(check_updates)
 
 @app.route('/article/<int:index>')
 def article(index):

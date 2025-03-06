@@ -1,5 +1,65 @@
 {% extends "base.html" %}
 
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var socket = io();
+        var currentArticles = [];
+
+        function compareArticles(a1, a2) {
+            return a1.title === a2.title && 
+                   a1.summary === a2.summary && 
+                   a1.date === a2.date && 
+                   a1.link === a2.link;
+        }
+
+        function createArticleElement(article) {
+            var articleCard = document.createElement('div');
+            articleCard.className = 'article-card';
+            articleCard.style.opacity = '0';
+            articleCard.style.transform = 'translateY(20px)';
+            articleCard.innerHTML = `
+                <a href="${article.link}" target="_blank" style="text-decoration: none; color: inherit;">
+                    <h2 class="article-title">${article.title}</h2>
+                    <p class="article-summary">${article.summary}</p>
+                    <div class="article-footer">
+                        <span class="article-date">${article.date.slice(0, 10)}</span>
+                        <span class="read-more">阅读全文</span>
+                    </div>
+                </a>
+            `;
+            return articleCard;
+        }
+
+        function animateArticle(element, delay) {
+            setTimeout(() => {
+                element.style.transition = 'all 0.5s ease';
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            }, delay);
+        }
+
+        socket.on('articles_update', function(data) {
+            if (JSON.stringify(currentArticles) === JSON.stringify(data.articles)) {
+                return; // 如果数据没有变化，不进行更新
+            }
+
+            var articleList = document.querySelector('.article-list');
+            articleList.innerHTML = '';
+            
+            data.articles.forEach(function(article, index) {
+                var articleCard = createArticleElement(article);
+                articleList.appendChild(articleCard);
+                animateArticle(articleCard, index * 100); // 错开动画时间
+            });
+
+            currentArticles = [...data.articles];
+        });
+    });
+</script>
+{% endblock %}
+
 {% block extra_css %}
 <style>
     .article-list {
@@ -7,32 +67,52 @@
         gap: 20px;
     }
     .article-card {
+        display: block;
+        text-decoration: none;
         background: var(--card-bg);
         border-radius: 16px;
         padding: 24px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        will-change: transform, opacity;
+        opacity: 0;
+        transform: translateY(20px);
         transition: all 0.3s ease;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(0, 122, 255, 0.1);
         position: relative;
         overflow: hidden;
+        color: inherit;
     }
     .article-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 30px rgba(0, 163, 255, 0.15);
-        border-color: rgba(0, 163, 255, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 122, 255, 0.1);
+        border-color: rgba(0, 122, 255, 0.3);
+    }
+    .read-more {
+        background: linear-gradient(135deg, #0052CC, #00A3FF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        display: inline-block;
+    }
+    .read-more:hover {
+        text-shadow: 0 0 10px rgba(0, 163, 255, 0.3);
+        transform: translateY(-1px);
     }
     .article-title {
         font-size: 24px;
         font-weight: 700;
         margin: 0 0 16px;
-        color: var(--text-color);
-        background: var(--gradient);
+        background: linear-gradient(135deg, #0052CC, #00A3FF);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-shadow: 0 2px 10px rgba(0, 163, 255, 0.1);
     }
     .article-summary {
-        color: rgba(228, 230, 240, 0.8);
+        color: var(--text-color);
         margin-bottom: 20px;
         line-height: 1.6;
         font-size: 16px;
@@ -50,12 +130,13 @@
     .read-more {
         color: var(--primary-color);
         text-decoration: none;
-        font-size: 14px;
+        font-weight: 500;
         transition: all 0.3s ease;
+        font-size: 14px;
     }
     .read-more:hover {
-        opacity: 0.8;
-        text-decoration: underline;
+        color: #00A3FF;
+        text-shadow: 0 0 10px rgba(0, 163, 255, 0.3);
     }
 </style>
 {% endblock %}
@@ -64,12 +145,14 @@
 <div class="article-list">
     {% for article in articles %}
     <div class="article-card">
-        <h2 class="article-title">{{ article.title }}</h2>
-        <p class="article-summary">{{ article.summary }}</p>
-        <div class="article-footer">
-            <span class="article-date">{{ article.date[:10] }}</span>
-            <a href="{{ article.link }}" target="_blank" class="read-more">阅读全文</a>
-        </div>
+        <a href="{{ article.link }}" target="_blank" style="text-decoration: none; color: inherit;">
+            <h2 class="article-title">{{ article.title }}</h2>
+            <p class="article-summary">{{ article.summary }}</p>
+            <div class="article-footer">
+                <span class="article-date">{{ article.date[:10] }}</span>
+                <span class="read-more">阅读全文</span>
+            </div>
+        </a>
     </div>
     {% endfor %}
 </div>
