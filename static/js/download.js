@@ -44,22 +44,32 @@ function generateNewsImage() {
             // 获取当前所有文章
             const articles = [];
             const articleCards = document.querySelectorAll('.article-card');
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
             articleCards.forEach(card => {
                 const titleElement = card.querySelector('.article-title');
                 const summaryElement = card.querySelector('.article-summary');
                 const dateElement = card.querySelector('.article-date');
-                if (titleElement && summaryElement) {
-                    articles.push({
-                        title: titleElement.textContent.trim(),
-                        summary: summaryElement.textContent.trim(),
-                        date: dateElement ? dateElement.textContent.trim() : ''
-                    });
+                if (titleElement && summaryElement && dateElement) {
+                    const articleDate = new Date(dateElement.textContent.trim());
+                    if (articleDate >= sevenDaysAgo) {
+                        articles.push({
+                            title: titleElement.textContent.trim(),
+                            summary: summaryElement.textContent.trim(),
+                            date: dateElement.textContent.trim()
+                        });
+                    }
                 }
             });
 
+            // 按日期倒序排序并限制数量
+            articles.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const limitedArticles = articles.slice(0, 15);
+
             // 检查是否有文章
-            if (!articles || articles.length === 0) {
-                alert('当前页面没有可下载的文章');
+            if (!limitedArticles || limitedArticles.length === 0) {
+                alert('当前页面没有最近7天内的文章');
                 return;
             }
 
@@ -73,7 +83,7 @@ function generateNewsImage() {
 
             // 计算文章列表的总高度
             let totalHeight = 0;
-            articles.forEach(article => {
+            limitedArticles.forEach(article => {
                 ctx.font = 'bold 24px -apple-system';
                 const titleLines = wrapText(ctx, article.title, 660, 24);
                 
@@ -101,25 +111,24 @@ function generateNewsImage() {
 
             // 绘制标题
             ctx.fillStyle = '#FFFFFF';
-            ctx.font = 'bold 32px -apple-system';
+            ctx.font = 'bold 45px -apple-system';
             const title = '河套应用创新技术资讯';
             const titleWidth = ctx.measureText(title).width;
-            ctx.fillText(title, (canvas.width - titleWidth) / 2, 80);
+            ctx.fillText(title, (canvas.width - titleWidth) / 2, 190);
 
             // 绘制当前时间
             const now = new Date();
             const days = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
             const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 ${days[now.getDay()]}`;
-            ctx.font = '14px -apple-system';
+            ctx.font = '21px -apple-system';
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
             const dateWidth = ctx.measureText(dateStr).width;
-            ctx.fillText(dateStr, (canvas.width - dateWidth) / 2, 110);
+            ctx.fillText(dateStr, (canvas.width - dateWidth) / 2, 220);
 
-            let y = 140; // 重置y坐标，增加与标题的间距
+            let y = 340; // 修改起始y坐标，确保在蓝色背景区域下方
 
             // 计算二维码区域所需的高度和位置
             const qrCodeHeight = 200; // 二维码尺寸(120px) + 文字说明 + 边距
-            // 移除错误的qrY计算
             
             // 绘制文章列表背景和阴影（扩展白色背景框范围）
             ctx.fillStyle = '#FFFFFF';
@@ -127,25 +136,30 @@ function generateNewsImage() {
             ctx.shadowBlur = 10;
             ctx.shadowOffsetY = 2;
             // 确保白色背景框足够大，完整包含所有内容
-            roundRect(ctx, 20, 120, canvas.width - 40, totalHeight + qrCodeHeight + 80, 12);
+            roundRect(ctx, 20, 340, canvas.width - 40, totalHeight + qrCodeHeight + 80, 12);
+            
+            // 重置阴影效果，确保文字不受阴影影响
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
 
             // 重置y坐标
-            y = 140;
+            y = 360; // 调整文章内容起始位置
 
             // 绘制文章列表 - 优化绘制逻辑
-            articles.forEach((article, index) => {
+            limitedArticles.forEach((article, index) => {
                 // 绘制文章序号
                 ctx.font = 'bold 24px -apple-system';
                 ctx.fillStyle = '#333333';
                 ctx.fillText(`${index + 1}.`, 30, y + 24);
 
                 // 绘制文章标题
-                ctx.font = 'bold 24px -apple-system';
+                ctx.font = 'bold 27px -apple-system';
                 ctx.fillStyle = '#333333';
-                const lines = wrapText(ctx, article.title, canvas.width - 90, 24);
+                const lines = wrapText(ctx, article.title, canvas.width - 90, 27);
                 lines.forEach(line => {
-                    ctx.fillText(line, 60, y + 24);
-                    y += 30;
+                    ctx.fillText(line, 60, y + 27);
+                    y += 33;
                 });
 
                 // 在标题和摘要之间添加更大的间距
