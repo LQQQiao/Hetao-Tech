@@ -5,9 +5,13 @@ import jwt
 import time
 from datetime import datetime
 import pytz
+from flask_caching import Cache
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+# 初始化缓存
+cache = Cache(app)
 
 def get_tenant_access_token():
     """获取飞书tenant_access_token"""
@@ -20,6 +24,7 @@ def get_tenant_access_token():
     response = requests.post(url, json=payload, headers=headers)
     return response.json().get("tenant_access_token")
 
+@cache.cached(timeout=None)
 def get_articles():
     """从飞书多维表格获取文章数据"""
     token = get_tenant_access_token()
@@ -97,12 +102,6 @@ def article(index):
     except Exception as e:
         app.logger.error(f"访问文章详情页出错: {str(e)}")
         return '服务器内部错误', 500
-
-@app.route('/refresh')
-def refresh():
-    """手动刷新数据缓存"""
-    cache.delete('articles')
-    return redirect('/')
 
 if __name__ == '__main__':
     app.run(debug=True, host='127.0.0.1', port=5000)
